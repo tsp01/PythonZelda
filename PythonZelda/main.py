@@ -1,4 +1,3 @@
-from email.mime import audio
 import pygame
 import sys
 from settings import *
