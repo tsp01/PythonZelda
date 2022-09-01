@@ -39,6 +39,9 @@ class Level:
         self.animation_player = AnimationPlayer()
         self.magic_player = MagicPlayer(self.animation_player)
 
+        #player death
+        self.player_dead = False
+
     #loads the sprites onto the map
     def create_map(self):
 
@@ -143,6 +146,9 @@ class Level:
             self.player.hurt_time = pygame.time.get_ticks()
             self.animation_player.create_particles(attack_type, self.player.rect.center, [self.visible_sprites])
 
+        if self.player.health < 0:
+            self.player_dead = True
+
     def trigger_death_particles(self, pos, particle_type):
 
         self.animation_player.create_particles(particle_type, pos, [self.visible_sprites])
@@ -160,14 +166,14 @@ class Level:
         self.visible_sprites.custom_draw(self.player)
         self.ui.display(self.player)
 
-        if self.game_paused:
+        if self.game_paused and not self.player_dead:
             self.upgrade.display()
         else:
             self.visible_sprites.update()
             self.visible_sprites.enemy_update(self.player)
             self.player_attack_logic()
         
-        #debug(self.player.status)
+            #debug(self.player.status)
 
 # to help control the camera
 class YSortCameraGroup(pygame.sprite.Group):
