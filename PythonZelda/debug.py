@@ -1,3 +1,7 @@
+"""
+file here to display  information while playing 
+for debug purpouses
+"""
 import pygame
 
 pygame.init()
@@ -5,6 +9,9 @@ pygame.init()
 font = pygame.font.Font(None,30)
 
 def debug(info, y = 10, x = 10):
+    """
+    Displays any information in the top left corner of the window
+    """
 
     display_surface = pygame.display.get_surface()
     debug_surf = font.render(str(info),True,'White')

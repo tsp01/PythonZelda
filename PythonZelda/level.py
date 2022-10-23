@@ -13,6 +13,10 @@ from magic import MagicPlayer
 from upgrade import Upgrade
 
 class Level:
+    """
+    Class controls the map, and spawn locations
+    Class also serves as secondary game loop calling almost all other classes
+    """
     def __init__(self):
 
         #get the display surface
@@ -45,6 +49,7 @@ class Level:
     #loads the sprites onto the map
     def create_map(self):
 
+        # loads all map files for spawn locations and ground
         layouts = {
             'boundary': import_csv_layout('map/map_FloorBlocks.csv'),
             'grass': import_csv_layout('map/map_Grass.csv'),
@@ -52,12 +57,14 @@ class Level:
             'entities': import_csv_layout('map/map_Entities.csv')
         }
 
+        # loads images for grass and stationary objects
         graphics = {
             'grass': import_folder('graphics/grass'),
             'objects': import_folder('graphics/objects'),
         }
         
-
+        # loops go through each square in each map table
+        # and spawn in the apropriate tile or entity
         for style,layout in layouts.items():
             for row_index, row in enumerate(layout):
                 for col_index, col in enumerate(row):
@@ -65,9 +72,11 @@ class Level:
                         x = col_index * TILESIZE
                         y = row_index * TILESIZE
 
+                        # creates boundary around areas the player can not cross
                         if style == 'boundary':
                             Tile((x,y),[self.obstacle_sprites],'invisible')
 
+                        # spawns cuttable grass
                         if style == 'grass':
                             grass_type = choice(graphics['grass'])
                             Tile(
@@ -76,10 +85,12 @@ class Level:
                                 'grass',
                                 grass_type)
 
+                        # spawns non interactable objects 
                         if style == 'object':
                             object_surf = graphics['objects'][int(col)]
                             Tile((x,y),[self.visible_sprites,self.obstacle_sprites],'object', object_surf)
-                            
+                        
+                        # spawns the player and enemies
                         if style == 'entities':
                             if col == '394':
                                 self.player = Player(
@@ -105,10 +116,16 @@ class Level:
                                     self.add_exp)
         
     def create_attack(self):
+        """
+        Creates an attack from the players current weapon
+        """
         
         self.current_attack = Weapon(self.player, [self.visible_sprites, self.attack_sprites])
 
     def create_magic(self, style, strength, cost):
+        """
+        Creates magic spells
+        """
         
         if style == 'heal':
             self.magic_player.heal(strength, cost, self.player, [self.visible_sprites])
@@ -117,12 +134,18 @@ class Level:
             self.magic_player.flame(strength, cost, self.player, [self.visible_sprites, self.attack_sprites])
 
     def destroy_attack(self):
+        """
+        Destroys an attack after it finshes
+        """
 
         if self.current_attack:
             self.current_attack.kill()
         self.current_attack = None
 
     def player_attack_logic(self):
+        """
+        makes sure enemies are damaged and grass is cut by attacks
+        """
 
         if self.attack_sprites:
             for attack_sprite in self.attack_sprites:
@@ -139,6 +162,9 @@ class Level:
                             target_sprite.get_damage(self.player, attack_sprite.sprite_type)
 
     def damage_player(self, amount, attack_type):
+        """
+        Decreases the players health and checks if player has died
+        """
 
         if self.player.vulnerable:
             self.player.health -= amount
@@ -150,18 +176,30 @@ class Level:
             self.player_dead = True
 
     def trigger_death_particles(self, pos, particle_type):
+        """
+        causes short animations upond death of enemies or player
+        """
 
         self.animation_player.create_particles(particle_type, pos, [self.visible_sprites])
 
     def add_exp(self, amount):
+        """
+        Increases the players EXP
+        """
 
         self.player.exp += amount
 
     def toggle_menu(self):
+        """
+        Allows player to pause via an upgrade menu
+        """
 
         self.game_paused = not self.game_paused
 
     def run(self):
+        """
+        updates level and calls other functions in proper order
+        """
 
         self.visible_sprites.custom_draw(self.player)
         self.ui.display(self.player)
@@ -191,6 +229,10 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.floor_rect = self.floor_surf.get_rect(topleft = (0,0))
 
     def custom_draw(self, player):
+        """
+        moves the camera via offsets and draws the floor
+        """
+
         #getting offset
         self.offset.x = player.rect.centerx - self.half_width
         self.offset.y = player.rect.centery - self.half_height
@@ -205,6 +247,9 @@ class YSortCameraGroup(pygame.sprite.Group):
             self.display_surface.blit(sprite.image, offset_pos)
 
     def enemy_update(self, player):
+        """
+        updates enemies
+        """
 
         enemy_sprites = [sprite for sprite in self.sprites() if hasattr(sprite, 'sprite_type') and sprite.sprite_type == 'enemy']
 

@@ -2,6 +2,9 @@ import pygame
 from settings import *
 
 class Tile(pygame.sprite.Sprite):
+    """
+    Class helps create floors and spawn in single tile objects
+    """
 
     def __init__(self,pos,groups,sprite_type,surface = pygame.Surface((TILESIZE,TILESIZE))):
         super().__init__(groups)

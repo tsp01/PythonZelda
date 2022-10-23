@@ -3,6 +3,9 @@ from csv import reader
 from os import walk
 
 def import_csv_layout(path):
+    """
+    reads csv files and returns them as lists
+    """
     
     terrain_map = []
 
@@ -13,6 +16,9 @@ def import_csv_layout(path):
         return terrain_map
 
 def import_folder(path):
+    """
+    reads folders and returns all image files in a list
+    """
 
     surface_list = []
     # reg_list = []
